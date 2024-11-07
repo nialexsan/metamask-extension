@@ -87,6 +87,7 @@ type AssetPickerModalProps = {
   ) => Generator<
     AssetWithDisplayData<NativeAsset> | AssetWithDisplayData<ERC20Asset>
   >;
+  isTokenListLoading?: boolean;
 } & Pick<
   React.ComponentProps<typeof AssetPickerModalTabs>,
   'visibleTabs' | 'defaultActiveTabKey'
@@ -106,6 +107,7 @@ export function AssetPickerModal({
   action,
   onNetworkPickerClick,
   customTokenListGenerator,
+  isTokenListLoading = false,
   ...tabProps
 }: AssetPickerModalProps) {
   const t = useI18nContext();
@@ -363,6 +365,7 @@ export function AssetPickerModal({
                 asset={asset?.type === AssetType.NFT ? undefined : asset}
                 tokenList={filteredTokenList}
                 isTokenDisabled={getIsDisabled}
+                isTokenListLoading={isTokenListLoading}
               />
             </React.Fragment>
             <AssetPickerModalNftTab
