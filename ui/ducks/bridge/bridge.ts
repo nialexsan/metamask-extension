@@ -12,7 +12,7 @@ import {
 } from '../../pages/bridge/types';
 // TODO: Remove restricted import
 // eslint-disable-next-line import/no-restricted-paths
-import { DEFAULT_SLIPPAGE } from '../../../app/scripts/controllers/bridge/constants';
+import { DEFAULT_SLIPPAGE } from '../../../shared/constants/bridge';
 
 export type BridgeState = {
   toChainId: Hex | null;
