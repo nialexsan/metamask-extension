@@ -64,6 +64,8 @@ export default class BridgeController extends StaticIntervalPollingController<
 > {
   #abortController: AbortController | undefined;
 
+  #quotesFirstFetched: number | undefined;
+
   #getLayer1GasFee: (params: {
     transactionParams: TransactionParams;
     chainId: ChainId;
@@ -153,6 +155,7 @@ export default class BridgeController extends StaticIntervalPollingController<
     });
 
     if (isValidQuoteRequest(updatedQuoteRequest)) {
+      this.#quotesFirstFetched = Date.now();
       const walletAddress = this.#getSelectedAccount().address;
       const srcChainIdInHex = add0x(
         decimalToHex(updatedQuoteRequest.srcChainId),
@@ -259,9 +262,6 @@ export default class BridgeController extends StaticIntervalPollingController<
         quoteRequest: request,
       };
     });
-    const { maxRefreshCount } =
-      bridgeState.bridgeFeatureFlags[BridgeFeatureFlagsKey.EXTENSION_CONFIG];
-    const newQuotesRefreshCount = bridgeState.quotesRefreshCount + 1;
 
     try {
       const quotes = await fetchBridgeQuotes(
@@ -269,23 +269,13 @@ export default class BridgeController extends StaticIntervalPollingController<
         this.#abortController.signal,
       );
 
-      // Stop polling if the maximum number of refreshes has been reached
-      if (
-        (request.insufficientBal && newQuotesRefreshCount >= 1) ||
-        (!request.insufficientBal && newQuotesRefreshCount >= maxRefreshCount)
-      ) {
-        this.stopAllPolling();
-      }
-
       const quotesWithL1GasFees = await this.#appendL1GasFees(quotes);
 
       this.update((_state) => {
         _state.bridgeState = {
           ..._state.bridgeState,
           quotes: quotesWithL1GasFees,
-          quotesLastFetched: Date.now(),
           quotesLoadingStatus: RequestStatus.FETCHED,
-          quotesRefreshCount: newQuotesRefreshCount,
         };
       });
     } catch (error) {
@@ -301,10 +291,36 @@ export default class BridgeController extends StaticIntervalPollingController<
           quoteFetchError:
             error instanceof Error ? error.message : 'Unknown error',
           quotesLoadingStatus: RequestStatus.ERROR,
-          quotesRefreshCount: newQuotesRefreshCount,
         };
       });
       console.log('Failed to fetch bridge quotes', error);
+    } finally {
+      const { maxRefreshCount } =
+        bridgeState.bridgeFeatureFlags[BridgeFeatureFlagsKey.EXTENSION_CONFIG];
+
+      const updatedQuotesRefreshCount = bridgeState.quotesRefreshCount + 1;
+      // Stop polling if the maximum number of refreshes has been reached
+      if (
+        request.insufficientBal ||
+        (!request.insufficientBal &&
+          updatedQuotesRefreshCount >= maxRefreshCount)
+      ) {
+        this.stopAllPolling();
+      }
+
+      // Update quote fetching stats
+      const quotesLastFetched = Date.now();
+      this.update((_state) => {
+        _state.bridgeState = {
+          ..._state.bridgeState,
+          quotesInitialLoadTime:
+            updatedQuotesRefreshCount === 1 && this.#quotesFirstFetched
+              ? quotesLastFetched - this.#quotesFirstFetched
+              : bridgeState.quotesInitialLoadTime,
+          quotesLastFetched,
+          quotesRefreshCount: updatedQuotesRefreshCount,
+        };
+      });
     }
   };
 

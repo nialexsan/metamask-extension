@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   ButtonPrimary,
   ButtonPrimarySize,
-  Icon,
   IconName,
   PopoverPosition,
 } from '../../../components/component-library';
@@ -11,7 +10,6 @@ import {
   getFromAmount,
   getFromChain,
   getFromToken,
-  getToChain,
   getToToken,
   getBridgeQuotes,
   getValidationErrors,
@@ -26,6 +24,7 @@ import useLatestBalance from '../../../hooks/bridge/useLatestBalance';
 import { SWAPS_CHAINID_DEFAULT_TOKEN_MAP } from '../../../../shared/constants/swaps';
 import { Row, Tooltip } from '../layout';
 import { getNativeCurrency } from '../../../ducks/metamask/metamask';
+import { useIsTxSubmittable } from '../../../hooks/bridge/useIsTxSubmittable';
 
 export const BridgeCTAButton = () => {
   const dispatch = useDispatch();
@@ -35,7 +34,6 @@ export const BridgeCTAButton = () => {
   const toToken = useSelector(getToToken);
 
   const fromChain = useSelector(getFromChain);
-  const toChain = useSelector(getToChain);
 
   const fromAmount = useSelector(getFromAmount);
 
@@ -69,17 +67,7 @@ export const BridgeCTAButton = () => {
   const isInsufficientGasForQuote =
     isInsufficientGasForQuote_(nativeAssetBalance);
 
-  const isTxSubmittable =
-    fromToken &&
-    toToken &&
-    fromChain &&
-    toChain &&
-    fromAmount &&
-    activeQuote &&
-    !isInsufficientBalance &&
-    !isInsufficientGasBalance &&
-    !isInsufficientGasForQuote &&
-    !isSubmitting;
+  const isTxSubmittable = useIsTxSubmittable();
 
   const label = useMemo(() => {
     if (isLoading && !isTxSubmittable) {
@@ -141,12 +129,12 @@ export const BridgeCTAButton = () => {
       variant={TextVariant.bodyMd}
       data-testid="bridge-cta-button"
       onClick={() => {
-        if (isTxSubmittable) {
+        if (activeQuote && isTxSubmittable && !isSubmitting) {
           setIsSubmitting(true);
           dispatch(submitBridgeTransaction(activeQuote));
         }
       }}
-      disabled={!isTxSubmittable}
+      disabled={!isTxSubmittable || isSubmitting}
     >
       {label}
     </ButtonPrimary>

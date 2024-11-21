@@ -13,6 +13,7 @@ import {
   ActionType,
   TxStatusData,
 } from './events/types';
+import { SortOrder } from '../../pages/bridge/types';
 
 export type CrossChainSwapsEventProperties = {
   [MetaMetricsEventName.ActionOpened]: RequestParams & {
@@ -46,7 +47,7 @@ export type CrossChainSwapsEventProperties = {
     QuoteFetchData;
   [MetaMetricsEventName.AllQuotesSorted]: RequestParams &
     RequestMetadata &
-    QuoteFetchData;
+    QuoteFetchData & { sort_order: SortOrder };
   [MetaMetricsEventName.QuoteSelected]: RequestParams &
     RequestMetadata &
     QuoteFetchData &

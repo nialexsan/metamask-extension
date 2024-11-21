@@ -360,6 +360,7 @@ export const getBridgeQuotes = createSelector(
   (state) =>
     state.metamask.bridgeState.quotesLoadingStatus === RequestStatus.LOADING,
   (state: BridgeAppState) => state.metamask.bridgeState.quotesRefreshCount,
+  (state: BridgeAppState) => state.metamask.bridgeState.quotesInitialLoadTime,
   (state: BridgeAppState) => state.metamask.bridgeState.quoteFetchError,
   getBridgeQuotesConfig,
   getQuoteRequest,
@@ -370,6 +371,7 @@ export const getBridgeQuotes = createSelector(
     quotesLastFetchedMs,
     isLoading,
     quotesRefreshCount,
+    quotesInitialLoadTimeMs,
     quoteFetchError,
     { maxRefreshCount },
     { insufficientBal },
@@ -381,6 +383,7 @@ export const getBridgeQuotes = createSelector(
     isLoading,
     quoteFetchError,
     quotesRefreshCount,
+    quotesInitialLoadTimeMs,
     isQuoteGoingToRefresh: insufficientBal
       ? false
       : quotesRefreshCount < maxRefreshCount,

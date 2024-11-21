@@ -37,6 +37,11 @@ import {
 import useLatestBalance from '../../../hooks/bridge/useLatestBalance';
 import { SWAPS_CHAINID_DEFAULT_TOKEN_MAP } from '../../../../shared/constants/swaps';
 import useRamps from '../../../hooks/ramps/useRamps/useRamps';
+import { MetaMetricsEventName } from '../../../../shared/constants/metametrics';
+import { useCrossChainSwapsEventTracker } from '../../../hooks/bridge/useCrossChainSwapsEventTracker';
+import { useRequestProperties } from '../../../hooks/bridge/events/useRequestProperties';
+import { useRequestMetadataProperties } from '../../../hooks/bridge/events/useRequestMetadataProperties';
+import { useQuoteProperties } from '../../../hooks/bridge/events/useQuoteProperties';
 import { BridgeQuotesModal } from './bridge-quotes-modal';
 
 export const BridgeQuoteCard = () => {
@@ -63,6 +68,10 @@ export const BridgeQuoteCard = () => {
   );
 
   const { openBuyCryptoInPdapp } = useRamps();
+  const trackCrossChainSwapsEvent = useCrossChainSwapsEventTracker();
+  const { quoteRequestProperties } = useRequestProperties();
+  const requestMetadataProperties = useRequestMetadataProperties();
+  const quoteListProperties = useQuoteProperties();
 
   const [showAllQuotes, setShowAllQuotes] = useState(false);
 
@@ -92,6 +101,17 @@ export const BridgeQuoteCard = () => {
                 variant={TextVariant.bodySm}
                 color={TextColor.primaryDefault}
                 onClick={() => {
+                  quoteRequestProperties &&
+                    requestMetadataProperties &&
+                    quoteListProperties &&
+                    trackCrossChainSwapsEvent({
+                      event: MetaMetricsEventName.AllQuotesOpened,
+                      properties: {
+                        ...quoteRequestProperties,
+                        ...requestMetadataProperties,
+                        ...quoteListProperties,
+                      },
+                    });
                   setShowAllQuotes(true);
                 }}
               >
