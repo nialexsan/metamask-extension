@@ -64,6 +64,12 @@ import { SECOND } from '../../../../shared/constants/time';
 import { Footer } from '../../../components/multichain/pages/page';
 import MascotBackgroundAnimation from '../../swaps/mascot-background-animation/mascot-background-animation';
 import { Column, Row, Tooltip } from '../layout';
+import { useCrossChainSwapsEventTracker } from '../../../hooks/bridge/useCrossChainSwapsEventTracker';
+import { useRequestProperties } from '../../../hooks/bridge/events/useRequestProperties';
+import {
+  MetaMetricsEventCategory,
+  MetaMetricsEventName,
+} from '../../../../shared/constants/metametrics';
 import { BridgeInputGroup } from './bridge-input-group';
 import { BridgeCTAButton } from './bridge-cta-button';
 
@@ -114,6 +120,9 @@ const PrepareBridgePage = () => {
     TokenBucketPriority.top,
     toChain?.chainId,
   );
+
+  const { flippedRequestProperties } = useRequestProperties();
+  const trackCrossChainSwapsEvent = useCrossChainSwapsEventTracker();
 
   const [rotateSwitchTokens, setRotateSwitchTokens] = useState(false);
 
@@ -301,6 +310,11 @@ const PrepareBridgePage = () => {
             disabled={!isValidQuoteRequest(quoteRequest, false)}
             onClick={() => {
               setRotateSwitchTokens(!rotateSwitchTokens);
+              flippedRequestProperties &&
+                trackCrossChainSwapsEvent({
+                  event: MetaMetricsEventName.InputSourceDestinationFlipped,
+                  properties: flippedRequestProperties,
+                });
               const toChainClientId =
                 toChain?.defaultRpcEndpointIndex !== undefined &&
                 toChain?.rpcEndpoints
