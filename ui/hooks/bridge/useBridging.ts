@@ -17,6 +17,7 @@ import { MetaMetricsContext } from '../../contexts/metametrics';
 import {
   MetaMetricsEventCategory,
   MetaMetricsEventName,
+  MetaMetricsSwapsEventSource,
 } from '../../../shared/constants/metametrics';
 
 import {
@@ -33,12 +34,14 @@ import { getProviderConfig } from '../../ducks/metamask/metamask';
 // eslint-disable-next-line import/no-restricted-paths
 import { getEnvironmentType } from '../../../app/scripts/lib/util';
 import { ENVIRONMENT_TYPE_FULLSCREEN } from '../../../shared/constants/app';
+import { useCrossChainSwapsEventTracker } from './useCrossChainSwapsEventTracker';
 ///: END:ONLY_INCLUDE_IF
 
 const useBridging = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const trackEvent = useContext(MetaMetricsContext);
+  const trackCrossChainSwapsEvent = useCrossChainSwapsEventTracker();
 
   const metaMetricsId = useSelector(getMetaMetricsId);
   const isMetaMetricsEnabled = useSelector(getParticipateInMetaMetrics);
@@ -66,6 +69,19 @@ const useBridging = () => {
       }
 
       if (isBridgeSupported) {
+        trackCrossChainSwapsEvent({
+          event: MetaMetricsEventName.ActionOpened,
+          category: MetaMetricsEventCategory.Navigation,
+          properties: {
+            location:
+              location === 'Home'
+                ? MetaMetricsSwapsEventSource.MainView
+                : MetaMetricsSwapsEventSource.TokenView,
+            chain_id_source: providerConfig.chainId,
+            token_symbol_source: token.symbol,
+            token_address_source: token.address,
+          },
+        });
         trackEvent({
           event: MetaMetricsEventName.BridgeLinkClicked,
           category: MetaMetricsEventCategory.Navigation,
