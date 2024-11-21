@@ -48,16 +48,35 @@ export const getTxGasEstimates = async ({
   };
 };
 
+export const getTokenExchangeRates = async (
+  chainId: string,
+  currency: string,
+  ...tokenAddresses: string[]
+) => {
+  const exchangeRates = await fetchTokenExchangeRates(
+    currency,
+    tokenAddresses,
+    chainId,
+  );
+  return Object.keys(exchangeRates).reduce(
+    (acc: Record<string, number | undefined>, address) => {
+      acc[address.toLowerCase()] = exchangeRates[address];
+      return acc;
+    },
+    {},
+  );
+};
+
 export const getTokenExchangeRate = async (request: {
   chainId: Hex;
   tokenAddress: string;
   currency: string;
 }) => {
   const { chainId, tokenAddress, currency } = request;
-  const exchangeRates = await fetchTokenExchangeRates(
-    currency,
-    [tokenAddress],
+  const exchangeRates = await getTokenExchangeRates(
     chainId,
+    currency,
+    tokenAddress,
   );
   return (
     exchangeRates?.[tokenAddress.toLowerCase()] ??

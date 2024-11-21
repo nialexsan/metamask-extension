@@ -7,6 +7,7 @@ import { createSelector } from 'reselect';
 import { GasFeeEstimates } from '@metamask/gas-fee-controller';
 import { BigNumber } from 'bignumber.js';
 import {
+  getCurrentCurrency,
   getIsBridgeEnabled,
   getSwapsDefaultToken,
   SwapsEthToken,
@@ -49,7 +50,10 @@ import {
   calcTotalGasFee,
   isNativeAddress,
 } from '../../pages/bridge/utils/quote';
-import { decGWEIToHexWEI } from '../../../shared/modules/conversion.utils';
+import {
+  decEthToConvertedCurrency,
+  decGWEIToHexWEI,
+} from '../../../shared/modules/conversion.utils';
 import { calcTokenAmount } from '../../../shared/lib/transactions-controller-utils';
 import { BridgeState } from './bridge';
 
@@ -343,6 +347,7 @@ export const getBridgeQuotes = createSelector(
   (state) =>
     state.metamask.bridgeState.quotesLoadingStatus === RequestStatus.LOADING,
   (state: BridgeAppState) => state.metamask.bridgeState.quotesRefreshCount,
+  (state: BridgeAppState) => state.metamask.bridgeState.quoteFetchError,
   getBridgeQuotesConfig,
   getQuoteRequest,
   (
@@ -352,6 +357,7 @@ export const getBridgeQuotes = createSelector(
     quotesLastFetchedMs,
     isLoading,
     quotesRefreshCount,
+    quoteFetchError,
     { maxRefreshCount },
     { insufficientBal },
   ) => ({
@@ -360,6 +366,7 @@ export const getBridgeQuotes = createSelector(
     activeQuote: selectedQuote ?? recommendedQuote,
     quotesLastFetchedMs,
     isLoading,
+    quoteFetchError,
     quotesRefreshCount,
     isQuoteGoingToRefresh: insufficientBal
       ? false
@@ -385,6 +392,46 @@ const _getValidatedSrcAmount = createSelector(
     srcTokenAmount && fromToken?.decimals
       ? calcTokenAmount(srcTokenAmount, Number(fromToken.decimals)).toFixed()
       : null,
+);
+
+export const getFromAmountInFiat = createSelector(
+  getFromToken,
+  getFromChain,
+  _getValidatedSrcAmount,
+  (state: BridgeAppState) => state.bridge.fromTokenExchangeRate,
+  getConversionRate,
+  getCurrentCurrency,
+  (
+    fromToken,
+    fromChain,
+    validatedSrcAmount,
+    fromTokenExchangeRate,
+    nativeExchangeRate,
+    currentCurrency,
+  ) => {
+    if (
+      fromToken?.symbol &&
+      fromChain?.chainId &&
+      validatedSrcAmount &&
+      nativeExchangeRate
+    ) {
+      if (isNativeAddress(fromToken.address)) {
+        return new BigNumber(
+          decEthToConvertedCurrency(
+            validatedSrcAmount,
+            currentCurrency,
+            nativeExchangeRate,
+          ).toString(),
+        );
+      }
+      if (fromTokenExchangeRate) {
+        return new BigNumber(validatedSrcAmount).mul(
+          new BigNumber(fromTokenExchangeRate.toString() ?? 1),
+        );
+      }
+    }
+    return new BigNumber(0);
+  },
 );
 
 export const getValidationErrors = createDeepEqualSelector(

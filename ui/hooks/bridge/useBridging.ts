@@ -32,6 +32,7 @@ import { getPortfolioUrl } from '../../helpers/utils/portfolio';
 import { SwapsTokenObject } from '../../../shared/constants/swaps';
 import { getProviderConfig } from '../../../shared/modules/selectors/networks';
 import { useCrossChainSwapsEventTracker } from './useCrossChainSwapsEventTracker';
+import { useQuoteFetchEvents } from './events/useQuoteFetchEvents';
 ///: END:ONLY_INCLUDE_IF
 
 const useBridging = () => {
@@ -54,6 +55,8 @@ const useBridging = () => {
   useEffect(() => {
     dispatch(setBridgeFeatureFlags());
   }, [dispatch, setBridgeFeatureFlags]);
+
+  useQuoteFetchEvents();
 
   const openBridgeExperience = useCallback(
     (
@@ -134,6 +137,7 @@ const useBridging = () => {
       history,
       metaMetricsId,
       trackEvent,
+      trackCrossChainSwapsEvent,
       isMetaMetricsEnabled,
       isMarketingEnabled,
       providerConfig,
