@@ -226,14 +226,14 @@ const PrepareBridgePage = () => {
   }, [fromChain, fromToken, fromTokens, search]);
 
   return (
-    <Column className="prepare-bridge-page">
+    <Column className="prepare-bridge-page" paddingInline={0}>
       <Column
         paddingTop={6}
-        paddingBottom={4}
+        // paddingBottom={4}
         paddingInline={0}
-        borderRadius={BorderRadius.LG}
-        borderWidth={1}
-        borderColor={BorderColor.borderMuted}
+        // borderRadius={BorderRadius.LG}
+        // borderWidth={1}
+        // borderColor={BorderColor.borderMuted}
       >
         <BridgeInputGroup
           header={t('swapSelectToken')}

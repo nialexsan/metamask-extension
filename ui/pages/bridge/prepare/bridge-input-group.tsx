@@ -29,6 +29,7 @@ import {
   FontWeight,
   TextAlign,
   TextColor,
+  JustifyContent,
   TextVariant,
 } from '../../../helpers/constants/design-system';
 import { CHAINID_DEFAULT_BLOCK_EXPLORER_HUMAN_READABLE_URL_MAP } from '../../../../shared/constants/common';
@@ -147,25 +148,6 @@ export const BridgeInputGroup = ({
   return (
     <Column paddingInline={4} gap={1}>
       <Row gap={4}>
-        <AssetPicker
-          header={header}
-          visibleTabs={[TabName.TOKENS]}
-          asset={asset}
-          onAssetChange={onAssetChange}
-          networkProps={networkProps}
-          customTokenListGenerator={customTokenListGenerator}
-          isTokenListLoading={isTokenListLoading}
-        >
-          {(onClickHandler, networkImageSrc) => (
-            <BridgeAssetPickerButton
-              onClick={onClickHandler}
-              networkImageSrc={networkImageSrc}
-              asset={asset}
-              networkProps={networkProps}
-            />
-          )}
-        </AssetPicker>
-
         <Column
           style={{ width: 96 }}
           display={
@@ -225,9 +207,27 @@ export const BridgeInputGroup = ({
             {amountInFiat && formatFiatAmount(amountInFiat, currency, 2)}
           </Text>
         </Column>
+        <AssetPicker
+          header={header}
+          visibleTabs={[TabName.TOKENS]}
+          asset={asset}
+          onAssetChange={onAssetChange}
+          networkProps={networkProps}
+          customTokenListGenerator={customTokenListGenerator}
+          isTokenListLoading={isTokenListLoading}
+        >
+          {(onClickHandler, networkImageSrc) => (
+            <BridgeAssetPickerButton
+              onClick={onClickHandler}
+              networkImageSrc={networkImageSrc}
+              asset={asset}
+              networkProps={networkProps}
+            />
+          )}
+        </AssetPicker>
       </Row>
 
-      <Row>
+      <Row justifyContent={JustifyContent.flexEnd}>
         <Text
           display={Display.Flex}
           gap={2}
