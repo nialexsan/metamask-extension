@@ -27,6 +27,8 @@ import {
 } from '../../../helpers/constants/design-system';
 import { getSlippage } from '../../../ducks/bridge/selectors';
 import { setSlippage } from '../../../ducks/bridge/actions';
+import { useCrossChainSwapsEventTracker } from '../../../hooks/bridge/useCrossChainSwapsEventTracker';
+import { MetaMetricsEventName } from '../../../../shared/constants/metametrics';
 
 const HARDCODED_SLIPPAGE_OPTIONS = [2, 3];
 
@@ -35,6 +37,8 @@ export const BridgeTransactionSettingsModal = ({
   isOpen,
 }: Omit<React.ComponentProps<typeof Modal>, 'children'>) => {
   const t = useI18nContext();
+  const trackCrossChainSwapsEvent = useCrossChainSwapsEventTracker();
+
   const dispatch = useDispatch();
 
   const slippage = useSelector(getSlippage);
@@ -131,7 +135,16 @@ export const BridgeTransactionSettingsModal = ({
             variant={TextVariant.bodyMd}
             disabled={(localSlippage || customSlippage) === slippage}
             onClick={() => {
-              dispatch(setSlippage(localSlippage || customSlippage));
+              const newSlippage = localSlippage || customSlippage;
+              newSlippage &&
+                trackCrossChainSwapsEvent({
+                  event: MetaMetricsEventName.InputChanged,
+                  properties: {
+                    input: 'slippage',
+                    value: newSlippage.toString(),
+                  },
+                });
+              dispatch(setSlippage(newSlippage));
               onClose();
             }}
           >

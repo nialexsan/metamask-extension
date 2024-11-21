@@ -64,12 +64,12 @@ import { SECOND } from '../../../../shared/constants/time';
 import { Footer } from '../../../components/multichain/pages/page';
 import MascotBackgroundAnimation from '../../swaps/mascot-background-animation/mascot-background-animation';
 import { Column, Row, Tooltip } from '../layout';
-import { useCrossChainSwapsEventTracker } from '../../../hooks/bridge/useCrossChainSwapsEventTracker';
-import { useRequestProperties } from '../../../hooks/bridge/events/useRequestProperties';
 import {
-  MetaMetricsEventCategory,
-  MetaMetricsEventName,
-} from '../../../../shared/constants/metametrics';
+  CrossChainSwapsEventProperties,
+  useCrossChainSwapsEventTracker,
+} from '../../../hooks/bridge/useCrossChainSwapsEventTracker';
+import { useRequestProperties } from '../../../hooks/bridge/events/useRequestProperties';
+import { MetaMetricsEventName } from '../../../../shared/constants/metametrics';
 import { BridgeInputGroup } from './bridge-input-group';
 import { BridgeCTAButton } from './bridge-cta-button';
 
@@ -174,6 +174,18 @@ const PrepareBridgePage = () => {
     [],
   );
 
+  const debouncedTrackInputEvent = useCallback(
+    (
+      properties: CrossChainSwapsEventProperties[MetaMetricsEventName.InputChanged],
+    ) => {
+      trackCrossChainSwapsEvent({
+        event: MetaMetricsEventName.InputChanged,
+        properties,
+      });
+    },
+    [],
+  );
+
   useEffect(() => {
     debouncedUpdateQuoteRequestInController(quoteParams);
   }, Object.values(quoteParams));
@@ -251,6 +263,11 @@ const PrepareBridgePage = () => {
             dispatch(setFromTokenInputValue(e));
           }}
           onAssetChange={(token) => {
+            token?.address &&
+              debouncedTrackInputEvent({
+                input: 'token_source',
+                value: token.address,
+              });
             dispatch(setFromToken(token));
             dispatch(setFromTokenInputValue(null));
             fromChain?.chainId &&
@@ -261,6 +278,10 @@ const PrepareBridgePage = () => {
             network: fromChain,
             networks: fromChains,
             onNetworkChange: (networkConfig) => {
+              debouncedTrackInputEvent({
+                input: 'chain_source',
+                value: networkConfig.chainId,
+              });
               if (networkConfig.chainId === toChain?.chainId) {
                 dispatch(setToChainId(null));
               }
@@ -349,6 +370,11 @@ const PrepareBridgePage = () => {
           header={t('swapSelectToken')}
           token={toToken}
           onAssetChange={(token) => {
+            token?.address &&
+              debouncedTrackInputEvent({
+                input: 'token_destination',
+                value: token.address,
+              });
             dispatch(setToToken(token));
             toChain?.chainId &&
               token?.address &&
@@ -358,6 +384,10 @@ const PrepareBridgePage = () => {
             network: toChain,
             networks: toChains,
             onNetworkChange: (networkConfig) => {
+              debouncedTrackInputEvent({
+                input: 'chain_destination',
+                value: networkConfig.chainId,
+              });
               dispatch(setToChainId(networkConfig.chainId));
               dispatch(setToChain(networkConfig.chainId));
             },
