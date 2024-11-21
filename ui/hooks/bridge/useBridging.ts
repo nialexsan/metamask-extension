@@ -35,6 +35,7 @@ import { getProviderConfig } from '../../ducks/metamask/metamask';
 import { getEnvironmentType } from '../../../app/scripts/lib/util';
 import { ENVIRONMENT_TYPE_FULLSCREEN } from '../../../shared/constants/app';
 import { useCrossChainSwapsEventTracker } from './useCrossChainSwapsEventTracker';
+import { useQuoteFetchEvents } from './events/useQuoteFetchEvents';
 ///: END:ONLY_INCLUDE_IF
 
 const useBridging = () => {
@@ -57,6 +58,8 @@ const useBridging = () => {
   useEffect(() => {
     dispatch(setBridgeFeatureFlags());
   }, [dispatch, setBridgeFeatureFlags]);
+
+  useQuoteFetchEvents();
 
   const openBridgeExperience = useCallback(
     (
@@ -139,6 +142,7 @@ const useBridging = () => {
       history,
       metaMetricsId,
       trackEvent,
+      trackCrossChainSwapsEvent,
       isMetaMetricsEnabled,
       isMarketingEnabled,
       providerConfig,

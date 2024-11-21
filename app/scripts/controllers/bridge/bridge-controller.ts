@@ -147,6 +147,7 @@ export default class BridgeController extends StaticIntervalPollingController<
         quotesLastFetched: DEFAULT_BRIDGE_CONTROLLER_STATE.quotesLastFetched,
         quotesLoadingStatus:
           DEFAULT_BRIDGE_CONTROLLER_STATE.quotesLoadingStatus,
+        quoteFetchError: DEFAULT_BRIDGE_CONTROLLER_STATE.quoteFetchError,
         quotesRefreshCount: DEFAULT_BRIDGE_CONTROLLER_STATE.quotesRefreshCount,
       };
     });
@@ -254,6 +255,7 @@ export default class BridgeController extends StaticIntervalPollingController<
       _state.bridgeState = {
         ...bridgeState,
         quotesLoadingStatus: RequestStatus.LOADING,
+        quoteFetchError: DEFAULT_BRIDGE_CONTROLLER_STATE.quoteFetchError,
         quoteRequest: request,
       };
     });
@@ -296,6 +298,8 @@ export default class BridgeController extends StaticIntervalPollingController<
       this.update((_state) => {
         _state.bridgeState = {
           ...bridgeState,
+          quoteFetchError:
+            error instanceof Error ? error.message : 'Unknown error',
           quotesLoadingStatus: RequestStatus.ERROR,
           quotesRefreshCount: newQuotesRefreshCount,
         };
