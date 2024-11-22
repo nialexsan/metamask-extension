@@ -25,6 +25,11 @@ import { SWAPS_CHAINID_DEFAULT_TOKEN_MAP } from '../../../../shared/constants/sw
 import { Row, Tooltip } from '../layout';
 import { getNativeCurrency } from '../../../ducks/metamask/metamask';
 import { useIsTxSubmittable } from '../../../hooks/bridge/useIsTxSubmittable';
+import { useCrossChainSwapsEventTracker } from '../../../hooks/bridge/useCrossChainSwapsEventTracker';
+import { useRequestProperties } from '../../../hooks/bridge/events/useRequestProperties';
+import { useRequestMetadataProperties } from '../../../hooks/bridge/events/useRequestMetadataProperties';
+import { useTradeProperties } from '../../../hooks/bridge/events/useTradeProperties';
+import { MetaMetricsEventName } from '../../../../shared/constants/metametrics';
 
 export const BridgeCTAButton = () => {
   const dispatch = useDispatch();
@@ -68,6 +73,10 @@ export const BridgeCTAButton = () => {
     isInsufficientGasForQuote_(nativeAssetBalance);
 
   const isTxSubmittable = useIsTxSubmittable();
+  const trackCrossChainSwapsEvent = useCrossChainSwapsEventTracker();
+  const { quoteRequestProperties } = useRequestProperties();
+  const requestMetadataProperties = useRequestMetadataProperties();
+  const tradeProperties = useTradeProperties();
 
   const label = useMemo(() => {
     if (isLoading && !isTxSubmittable) {
@@ -129,6 +138,17 @@ export const BridgeCTAButton = () => {
       variant={TextVariant.bodyMd}
       data-testid="bridge-cta-button"
       onClick={() => {
+        quoteRequestProperties &&
+          requestMetadataProperties &&
+          tradeProperties &&
+          trackCrossChainSwapsEvent({
+            event: MetaMetricsEventName.ActionSubmitted,
+            properties: {
+              ...quoteRequestProperties,
+              ...requestMetadataProperties,
+              ...tradeProperties,
+            },
+          });
         if (activeQuote && isTxSubmittable && !isSubmitting) {
           setIsSubmitting(true);
           dispatch(submitBridgeTransaction(activeQuote));
