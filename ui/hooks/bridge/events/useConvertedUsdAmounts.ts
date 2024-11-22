@@ -82,12 +82,24 @@ export const useConvertedUsdAmounts = () => {
               )
               .toNumber()
           : fromAmountInFiat.toNumber(),
+      // If user's selected currency is not usd, fetch usd exchange rates for
+      // the gas token and convert the quoted gas amount to usd
       usd_quoted_gas:
         activeQuote?.gasFee.amount && !isCurrencyUsd
           ? new Numeric(activeQuote.gasFee.amount, 10)
               .applyConversionRate((await usdSrcExchangeRates)[zeroAddress()])
               .toNumber()
           : activeQuote?.gasFee.fiat?.toNumber() ?? 0,
+    }),
+    destUsdAmounts: async () => ({
+      // If user's selected currency is not usd, fetch usd exchange rates for
+      // the dest asset and convert the dest amount to usd
+      usd_quoted_return:
+        activeQuote?.toTokenAmount?.amount && toTokenAddress && !isCurrencyUsd
+          ? new Numeric(activeQuote?.toTokenAmount?.amount, 10)
+              .applyConversionRate((await usdDestExchangeRates)[toTokenAddress])
+              .toNumber()
+          : activeQuote?.toTokenAmount?.fiat?.toNumber() ?? 0,
     }),
   };
 };

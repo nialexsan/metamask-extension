@@ -13,6 +13,11 @@ import { useI18nContext } from '../../../hooks/useI18nContext';
 import useSubmitBridgeTransaction from '../hooks/useSubmitBridgeTransaction';
 import useLatestBalance from '../../../hooks/bridge/useLatestBalance';
 import { useIsTxSubmittable } from '../../../hooks/bridge/useIsTxSubmittable';
+import { useCrossChainSwapsEventTracker } from '../../../hooks/bridge/useCrossChainSwapsEventTracker';
+import { useRequestProperties } from '../../../hooks/bridge/events/useRequestProperties';
+import { useRequestMetadataProperties } from '../../../hooks/bridge/events/useRequestMetadataProperties';
+import { useTradeProperties } from '../../../hooks/bridge/events/useTradeProperties';
+import { MetaMetricsEventName } from '../../../../shared/constants/metametrics';
 
 export const BridgeCTAButton = () => {
   const dispatch = useDispatch();
@@ -35,6 +40,10 @@ export const BridgeCTAButton = () => {
   const { normalizedBalance } = useLatestBalance(fromToken, fromChain?.chainId);
 
   const isTxSubmittable = useIsTxSubmittable();
+  const trackCrossChainSwapsEvent = useCrossChainSwapsEventTracker();
+  const { quoteRequestProperties } = useRequestProperties();
+  const requestMetadataProperties = useRequestMetadataProperties();
+  const tradeProperties = useTradeProperties();
 
   const label = useMemo(() => {
     if (isLoading && !isTxSubmittable) {
@@ -75,6 +84,18 @@ export const BridgeCTAButton = () => {
       data-testid="bridge-cta-button"
       onClick={() => {
         if (activeQuote && isTxSubmittable) {
+          (async () =>
+            quoteRequestProperties &&
+            requestMetadataProperties &&
+            tradeProperties &&
+            trackCrossChainSwapsEvent({
+              event: MetaMetricsEventName.ActionSubmitted,
+              properties: {
+                ...quoteRequestProperties,
+                ...requestMetadataProperties,
+                ...(await tradeProperties()),
+              },
+            }))();
           dispatch(submitBridgeTransaction(activeQuote));
         }
       }}
