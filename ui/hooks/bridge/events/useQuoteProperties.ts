@@ -15,7 +15,11 @@ export const useQuoteProperties = () => {
     ? (Date.now() - quotesInitialLoadTimeMs) / (MILLISECOND * MINUTE)
     : undefined;
 
-  if (!isLoading && initial_load_time_all_quotes !== undefined) {
+  if (
+    !isLoading &&
+    initial_load_time_all_quotes !== undefined &&
+    can_submit !== undefined
+  ) {
     return {
       can_submit,
       best_quote_provider: formatProviderLabel(recommendedQuote),

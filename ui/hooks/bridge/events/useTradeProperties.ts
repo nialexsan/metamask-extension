@@ -90,5 +90,3 @@ export const useTradeProperties = () => {
 
   return;
 };
-
-// TODO make all property hooks async to avoid race conditions
