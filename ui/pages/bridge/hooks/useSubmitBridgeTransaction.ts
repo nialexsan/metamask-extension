@@ -18,6 +18,7 @@ export default function useSubmitBridgeTransaction() {
   const { handleBridgeTx } = useHandleBridgeTx();
 
   const submitBridgeTransaction = async (quoteResponse: QuoteResponse) => {
+    // TODO catch errors and emit ActionFailed here
     // Execute transaction(s)
     let approvalTxMeta: TransactionMeta | undefined;
     if (quoteResponse?.approval) {
