@@ -2,7 +2,7 @@ import { useDispatch } from 'react-redux';
 import { zeroAddress } from 'ethereumjs-util';
 import { useHistory } from 'react-router-dom';
 import { TransactionMeta } from '@metamask/transaction-controller';
-import { QuoteMetadata, QuoteResponse } from '../types';
+import { QuoteResponse } from '../types';
 import { DEFAULT_ROUTE } from '../../../helpers/constants/routes';
 import { setDefaultHomeActiveTabName } from '../../../store/actions';
 import { startPollingForBridgeTxStatus } from '../../../ducks/bridge-status/actions';
@@ -17,9 +17,7 @@ export default function useSubmitBridgeTransaction() {
   const { handleApprovalTx } = useHandleApprovalTx();
   const { handleBridgeTx } = useHandleBridgeTx();
 
-  const submitBridgeTransaction = async (
-    quoteResponse: QuoteResponse & QuoteMetadata,
-  ) => {
+  const submitBridgeTransaction = async (quoteResponse: QuoteResponse) => {
     // TODO catch errors and emit ActionFailed here
     // Execute transaction(s)
     let approvalTxMeta: TransactionMeta | undefined;

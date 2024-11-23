@@ -167,6 +167,7 @@ export default class BridgeStatusController extends StaticIntervalPollingControl
       quoteResponse,
       startTime,
       slippagePercentage,
+      pricingData,
       initialDestAssetBalance,
       targetContractAddress,
     } = startPollingForBridgeTxStatusArgs;
@@ -177,17 +178,6 @@ export default class BridgeStatusController extends StaticIntervalPollingControl
     const { bridgeStatusState } = this.state;
     const { address: account } = this.#getSelectedAccount();
 
-    const {
-      quote,
-      trade,
-      approval,
-      estimatedProcessingTimeInSeconds,
-      ...quoteMetadata
-    } = quoteResponse;
-    // Stringify quoteMetadata so we can store it in state
-    // const pricingData = JSON.parse(JSON.stringify(quoteMetadata));
-    const pricingData = {};
-
     // Write all non-status fields to state so we can reference the quote in Activity list without the Bridge API
     // We know it's in progress but not the exact status yet
     this.update((_state) => {
@@ -196,9 +186,10 @@ export default class BridgeStatusController extends StaticIntervalPollingControl
         txHistory: {
           ...bridgeStatusState.txHistory,
           [statusRequest.srcTxHash]: {
-            quote,
+            quote: quoteResponse.quote,
             startTime,
-            estimatedProcessingTimeInSeconds,
+            estimatedProcessingTimeInSeconds:
+              quoteResponse.estimatedProcessingTimeInSeconds,
             slippagePercentage,
             pricingData,
             initialDestAssetBalance,

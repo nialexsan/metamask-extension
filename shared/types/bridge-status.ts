@@ -1,11 +1,5 @@
-import { BigNumber } from 'bignumber.js';
-import {
-  ChainId,
-  Quote,
-  QuoteMetadata,
-  QuoteResponse,
-  // eslint-disable-next-line import/no-restricted-paths
-} from '../../ui/pages/bridge/types';
+// eslint-disable-next-line import/no-restricted-paths
+import { ChainId, Quote, QuoteResponse } from '../../ui/pages/bridge/types';
 
 // All fields need to be types not interfaces, same with their children fields
 // o/w you get a type error
@@ -110,20 +104,6 @@ export type RefuelStatusResponse = object & StatusResponse;
 
 export type RefuelData = object & Step;
 
-type PricingData<QuoteMetaDataValue> = {
-  [P in keyof QuoteMetaDataValue]: QuoteMetaDataValue[P] extends
-    | BigNumber
-    | (BigNumber | null)
-    ? string
-    : QuoteMetaDataValue[P];
-};
-
-type QuoteMetadataForState = {
-  [P in keyof QuoteMetadata]: QuoteMetadata[P] extends BigNumber
-    ? string
-    : PricingData<QuoteMetadata[P]>;
-};
-
 export type BridgeHistoryItem = {
   quote: Quote;
   status: StatusResponse;
@@ -131,13 +111,18 @@ export type BridgeHistoryItem = {
   estimatedProcessingTimeInSeconds: number;
   slippagePercentage: number;
   completionTime?: number;
-  pricingData?: QuoteMetadataForState;
+  pricingData?: {
+    quotedGasInUsd: number;
+    quotedReturnInUsd: number;
+    amountSentInUsd: number;
+    quotedRefuelSrcAmountInUsd?: number;
+    quotedRefuelDestAmountInUsd?: number;
+  };
   initialDestAssetBalance?: number;
   targetContractAddress?: string;
   account: string;
 };
 
-// [P in keyof T]: T[P] extends From ? To : T[P];
 export enum BridgeStatusAction {
   START_POLLING_FOR_BRIDGE_TX_STATUS = 'startPollingForBridgeTxStatus',
   WIPE_BRIDGE_STATUS = 'wipeBridgeStatus',
@@ -146,7 +131,7 @@ export enum BridgeStatusAction {
 
 export type StartPollingForBridgeTxStatusArgs = {
   statusRequest: StatusRequest;
-  quoteResponse: QuoteResponse & QuoteMetadata;
+  quoteResponse: QuoteResponse;
   startTime?: BridgeHistoryItem['startTime'];
   slippagePercentage: BridgeHistoryItem['slippagePercentage'];
   pricingData?: BridgeHistoryItem['pricingData'];
