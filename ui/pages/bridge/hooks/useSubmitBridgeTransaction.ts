@@ -19,7 +19,9 @@ export default function useSubmitBridgeTransaction() {
 
   const submitBridgeTransaction = async (quoteResponse: QuoteResponse) => {
     // TODO catch errors and emit ActionFailed here
+    const eventData = { request: {}, requestMetadata: {}, trade: {}, txs: {} };
     // Execute transaction(s)
+    // TODO if approval fails what happens here?
     let approvalTxMeta: TransactionMeta | undefined;
     if (quoteResponse?.approval) {
       approvalTxMeta = await handleApprovalTx({
@@ -50,6 +52,8 @@ export default function useSubmitBridgeTransaction() {
           quoteResponse,
           slippagePercentage: 0, // TODO pull this from redux/bridgecontroller once it's implemented. currently hardcoded in quoteRequest.slippage right now
           startTime: bridgeTxMeta.time,
+          // TODO add eventData
+          eventData: {},
         }),
       );
     }

@@ -1,3 +1,10 @@
+import {
+  RequestMetadata,
+  RequestParams,
+  TradeData,
+  TxStatusData,
+  // eslint-disable-next-line import/no-restricted-paths
+} from '../../ui/hooks/bridge/events/types';
 // eslint-disable-next-line import/no-restricted-paths
 import { ChainId, Quote, QuoteResponse } from '../../ui/pages/bridge/types';
 
@@ -111,12 +118,11 @@ export type BridgeHistoryItem = {
   estimatedProcessingTimeInSeconds: number;
   slippagePercentage: number;
   completionTime?: number;
-  pricingData?: {
-    quotedGasInUsd: number;
-    quotedReturnInUsd: number;
-    amountSentInUsd: number;
-    quotedRefuelSrcAmountInUsd?: number;
-    quotedRefuelDestAmountInUsd?: number;
+  eventData?: {
+    request: RequestParams;
+    requestMetadata: RequestMetadata;
+    trade?: TradeData;
+    txs?: TxStatusData;
   };
   initialDestAssetBalance?: number;
   targetContractAddress?: string;
@@ -134,7 +140,7 @@ export type StartPollingForBridgeTxStatusArgs = {
   quoteResponse: QuoteResponse;
   startTime?: BridgeHistoryItem['startTime'];
   slippagePercentage: BridgeHistoryItem['slippagePercentage'];
-  pricingData?: BridgeHistoryItem['pricingData'];
+  eventData?: BridgeHistoryItem['eventData'];
   initialDestAssetBalance?: BridgeHistoryItem['initialDestAssetBalance'];
   targetContractAddress?: BridgeHistoryItem['targetContractAddress'];
 };

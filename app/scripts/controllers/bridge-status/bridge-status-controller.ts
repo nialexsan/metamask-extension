@@ -167,7 +167,7 @@ export default class BridgeStatusController extends StaticIntervalPollingControl
       quoteResponse,
       startTime,
       slippagePercentage,
-      pricingData,
+      eventData,
       initialDestAssetBalance,
       targetContractAddress,
     } = startPollingForBridgeTxStatusArgs;
@@ -191,7 +191,7 @@ export default class BridgeStatusController extends StaticIntervalPollingControl
             estimatedProcessingTimeInSeconds:
               quoteResponse.estimatedProcessingTimeInSeconds,
             slippagePercentage,
-            pricingData,
+            eventData,
             initialDestAssetBalance,
             targetContractAddress,
             account,
