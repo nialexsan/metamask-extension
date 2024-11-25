@@ -634,7 +634,7 @@ export function getAllDomains(state) {
 }
 
 export const getConfirmationExchangeRates = (state) => {
-  return state.metamask.confirmationExchangeRates;
+  return state.appState.confirmationExchangeRates;
 };
 
 export const getSelectedAccount = createDeepEqualSelector(
@@ -1157,7 +1157,7 @@ export function getUseNonceField(state) {
 }
 
 export function getCustomNonceValue(state) {
-  return String(state.metamask.customNonceValue);
+  return String(state.appState.customNonceValue);
 }
 
 /**
@@ -1561,7 +1561,7 @@ export function getNativeCurrencyForChain(chainId) {
 }
 
 export function getNextSuggestedNonce(state) {
-  return Number(state.metamask.nextNonce);
+  return Number(state.appState.nextNonce);
 }
 
 export function getShowWhatsNewPopup(state) {
@@ -3049,3 +3049,5 @@ export function getKeyringSnapRemovalResult(state) {
 }
 
 ///: END:ONLY_INCLUDE_IF
+
+export const getPendingTokens = (state) => state.appState.pendingTokens;
