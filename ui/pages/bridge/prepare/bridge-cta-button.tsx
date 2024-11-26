@@ -5,6 +5,7 @@ import {
   ButtonPrimarySize,
   IconName,
   PopoverPosition,
+  Text,
 } from '../../../components/component-library';
 import {
   getFromAmount,
@@ -18,6 +19,8 @@ import { useI18nContext } from '../../../hooks/useI18nContext';
 import useSubmitBridgeTransaction from '../hooks/useSubmitBridgeTransaction';
 import {
   BlockSize,
+  TextAlign,
+  TextColor,
   TextVariant,
 } from '../../../helpers/constants/design-system';
 import useLatestBalance from '../../../hooks/bridge/useLatestBalance';
@@ -115,7 +118,7 @@ export const BridgeCTAButton = () => {
     }
 
     if (isTxSubmittable) {
-      return t('confirm');
+      return t('submit');
     }
 
     return t('swapSelectToken');
@@ -131,7 +134,7 @@ export const BridgeCTAButton = () => {
     isInsufficientGasForQuote,
   ]);
 
-  return (
+  return activeQuote ? (
     <ButtonPrimary
       width={BlockSize.Full}
       size={activeQuote ? ButtonPrimarySize.Md : ButtonPrimarySize.Lg}
@@ -158,5 +161,14 @@ export const BridgeCTAButton = () => {
     >
       {label}
     </ButtonPrimary>
+  ) : (
+    <Text
+      variant={TextVariant.bodyMd}
+      width={BlockSize.Full}
+      textAlign={TextAlign.Center}
+      color={TextColor.textAlternative}
+    >
+      {label}
+    </Text>
   );
 };

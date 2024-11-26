@@ -128,7 +128,7 @@ const CrossChainSwap = () => {
       >
         {t('bridge')}
       </Header>
-      <Content paddingTop={0}>
+      <Content padding={0}>
         <Switch>
           <FeatureToggledRoute
             redirectRoute={SWAPS_MAINTENANCE_ROUTE}

@@ -4,14 +4,11 @@ import {
   SelectButtonSize,
 } from '../../../../components/component-library/select-button/select-button.types';
 import {
-  AvatarBase,
   AvatarNetwork,
   AvatarNetworkSize,
   AvatarToken,
   BadgeWrapper,
   BadgeWrapperPosition,
-  Icon,
-  IconSize,
   SelectButton,
   Text,
 } from '../../../../components/component-library';
@@ -21,14 +18,12 @@ import {
   BlockSize,
   BorderColor,
   BorderRadius,
-  IconColor,
+  Display,
   OverflowWrap,
   TextVariant,
 } from '../../../../helpers/constants/design-system';
-import { IconName } from '@metamask/snaps-sdk/jsx';
 import { useI18nContext } from '../../../../hooks/useI18nContext';
 import { AssetPicker } from '../../../../components/multichain/asset-picker-amount/asset-picker';
-import { NETWORK_TO_NAME_MAP } from '../../../../../shared/constants/network';
 
 export const BridgeAssetPickerButton = ({
   asset,
@@ -47,13 +42,9 @@ export const BridgeAssetPickerButton = ({
       backgroundColor={BackgroundColor.backgroundDefault}
       borderColor={BorderColor.borderMuted}
       style={{
-        width: '180px',
-        height: '54px',
-        maxWidth: '343px',
-        paddingLeft: 12,
-        paddingRight: 12,
-        paddingTop: 5,
-        paddingBottom: 5,
+        padding: 8,
+        paddingRight: 11,
+        paddingInline: asset ? undefined : 24,
       }}
       gap={0}
       size={SelectButtonSize.Lg}
@@ -64,53 +55,38 @@ export const BridgeAssetPickerButton = ({
         ellipsis: false,
       }}
       caretIconProps={{
-        name: IconName.ArrowDown,
-        color: IconColor.iconMuted,
-        paddingLeft: 1,
+        display: Display.None,
       }}
       label={<Text ellipsis>{asset?.symbol ?? t('bridgeTo')}</Text>}
-      description={
-        asset && networkProps?.network
-          ? t('onNetwork', [
-              NETWORK_TO_NAME_MAP[
-                networkProps.network.chainId as keyof typeof NETWORK_TO_NAME_MAP
-              ] ?? networkProps.network.name,
-            ])
-          : undefined
-      }
       startAccessory={
-        <BadgeWrapper
-          marginRight={2}
-          badge={
-            asset && networkProps?.network?.name ? (
-              <AvatarNetwork
-                name={networkProps.network.name}
-                src={networkImageSrc}
-                size={AvatarNetworkSize.Xs}
+        asset ? (
+          <BadgeWrapper
+            marginRight={2}
+            badge={
+              asset && networkProps?.network?.name ? (
+                <AvatarNetwork
+                  name={networkProps.network.name}
+                  src={networkImageSrc}
+                  size={AvatarNetworkSize.Xs}
+                  style={{ borderRadius: 3 }}
+                  borderColor={BorderColor.backgroundDefault}
+                  borderWidth={2}
+                />
+              ) : undefined
+            }
+            position={BadgeWrapperPosition.bottomRight}
+            badgeContainerProps={{ width: BlockSize.Min }}
+          >
+            {asset ? (
+              <AvatarToken
+                src={asset.image || undefined}
+                backgroundColor={BackgroundColor.backgroundHover}
+                name={asset.symbol}
+                borderWidth={0}
               />
-            ) : undefined
-          }
-          position={BadgeWrapperPosition.bottomRight}
-          badgeContainerProps={{ width: BlockSize.Min }}
-          style={{ alignSelf: 'auto' }}
-        >
-          {asset ? (
-            <AvatarToken
-              src={asset.image || undefined}
-              backgroundColor={BackgroundColor.backgroundHover}
-              name={asset.symbol}
-              borderColor={BorderColor.borderMuted}
-            />
-          ) : (
-            <AvatarBase backgroundColor={BackgroundColor.backgroundHover}>
-              <Icon
-                name={IconName.Add}
-                size={IconSize.Sm}
-                color={IconColor.overlayInverse}
-              />
-            </AvatarBase>
-          )}
-        </BadgeWrapper>
+            ) : undefined}
+          </BadgeWrapper>
+        ) : undefined
       }
       {...props}
     />

@@ -40,10 +40,11 @@ import {
   Text,
 } from '../../../components/component-library';
 import {
+  BackgroundColor,
   BlockSize,
-  BorderColor,
-  BorderRadius,
+  Display,
   FlexDirection,
+  IconColor,
   JustifyContent,
   TextAlign,
   TextColor,
@@ -247,76 +248,90 @@ const PrepareBridgePage = () => {
   }, [fromChain, fromToken, fromTokens, search]);
 
   return (
-    <Column className="prepare-bridge-page" paddingInline={0}>
-      <Column
-        paddingTop={6}
-        // paddingBottom={4}
-        paddingInline={0}
-        // borderRadius={BorderRadius.LG}
-        // borderWidth={1}
-        // borderColor={BorderColor.borderMuted}
-      >
-        <BridgeInputGroup
-          header={t('swapSelectToken')}
-          token={fromToken}
-          onAmountChange={(e) => {
-            dispatch(setFromTokenInputValue(e));
-          }}
-          onAssetChange={(token) => {
+    <Column className="prepare-bridge-page" gap={8}>
+      <BridgeInputGroup
+        header={t('swapSelectToken')}
+        token={fromToken}
+        onAmountChange={(e) => {
+          dispatch(setFromTokenInputValue(e));
+        }}
+        onAssetChange={(token) => {
+          token?.address &&
+            debouncedTrackInputEvent({
+              input: 'token_source',
+              value: token.address,
+            });
+          dispatch(setFromToken(token));
+          dispatch(setFromTokenInputValue(null));
+          fromChain?.chainId &&
             token?.address &&
-              debouncedTrackInputEvent({
-                input: 'token_source',
-                value: token.address,
-              });
-            dispatch(setFromToken(token));
+            debouncedFetchFromExchangeRate(fromChain.chainId, token.address);
+        }}
+        networkProps={{
+          network: fromChain,
+          networks: fromChains,
+          onNetworkChange: (networkConfig) => {
+            debouncedTrackInputEvent({
+              input: 'chain_source',
+              value: networkConfig.chainId,
+            });
+            if (networkConfig.chainId === toChain?.chainId) {
+              dispatch(setToChainId(null));
+            }
+            dispatch(
+              setActiveNetwork(
+                networkConfig.rpcEndpoints[
+                  networkConfig.defaultRpcEndpointIndex
+                ].networkClientId,
+              ),
+            );
+            dispatch(setFromChain(networkConfig.chainId));
+            dispatch(setFromToken(null));
             dispatch(setFromTokenInputValue(null));
-            fromChain?.chainId &&
-              token?.address &&
-              debouncedFetchFromExchangeRate(fromChain.chainId, token.address);
-          }}
-          networkProps={{
-            network: fromChain,
-            networks: fromChains,
-            onNetworkChange: (networkConfig) => {
-              debouncedTrackInputEvent({
-                input: 'chain_source',
-                value: networkConfig.chainId,
-              });
-              if (networkConfig.chainId === toChain?.chainId) {
-                dispatch(setToChainId(null));
-              }
-              dispatch(
-                setActiveNetwork(
-                  networkConfig.rpcEndpoints[
-                    networkConfig.defaultRpcEndpointIndex
-                  ].networkClientId,
-                ),
-              );
-              dispatch(setFromChain(networkConfig.chainId));
-              dispatch(setFromToken(null));
-              dispatch(setFromTokenInputValue(null));
-            },
-            header: t('bridgeFrom'),
-          }}
-          customTokenListGenerator={
-            fromTokens && fromTopAssets ? fromTokenListGenerator : undefined
-          }
-          onMaxButtonClick={(value: string) => {
-            dispatch(setFromTokenInputValue(value));
-          }}
-          amountInFiat={fromAmountInFiat}
-          amountFieldProps={{
-            testId: 'from-amount',
-            autoFocus: true,
-            value: fromAmount || undefined,
-          }}
-          isTokenListLoading={isFromTokensLoading}
-        />
+          },
+          header: t('bridgeFrom'),
+        }}
+        customTokenListGenerator={
+          fromTokens && fromTopAssets ? fromTokenListGenerator : undefined
+        }
+        onMaxButtonClick={(value: string) => {
+          dispatch(setFromTokenInputValue(value));
+        }}
+        amountInFiat={fromAmountInFiat}
+        amountFieldProps={{
+          testId: 'from-amount',
+          autoFocus: true,
+          value: fromAmount || undefined,
+        }}
+        isTokenListLoading={isFromTokensLoading}
+      />
 
+      <Column
+        height={BlockSize.Full}
+        paddingTop={8}
+        backgroundColor={BackgroundColor.backgroundAlternative}
+        style={{
+          borderTop: '1px solid var(--color-border-muted)',
+          position: 'relative',
+        }}
+      >
         <Box
           className="prepare-bridge-page__switch-tokens"
-          paddingTop={2}
-          paddingBottom={4}
+          display={Display.Flex}
+          style={{
+            position: 'absolute',
+            top: 'calc(-20px + 1px)',
+            right: 'calc(50% - 20px)',
+            border: '1px solid var(--color-border-muted)',
+            borderRadius: '100%',
+            background: isValidQuoteRequest(quoteRequest, false)
+              ? 'var(--color-background-default)'
+              : 'var(--color-background-alternative)',
+            opacity: 1,
+            width: 40,
+            height: 40,
+            justifyContent: JustifyContent.center,
+          }}
         >
           <ButtonIcon
             iconProps={{
@@ -324,10 +339,16 @@ const PrepareBridgePage = () => {
                 rotate: rotateSwitchTokens,
               }),
             }}
-            width={BlockSize.Full}
+            style={{
+              alignSelf: 'center',
+              borderRadius: '100%',
+              width: '100%',
+              height: '100%',
+            }}
             data-testid="switch-tokens"
             ariaLabel="switch-tokens"
             iconName={IconName.Arrow2Down}
+            color={IconColor.iconAlternative}
             disabled={!isValidQuoteRequest(quoteRequest, false)}
             onClick={() => {
               setRotateSwitchTokens(!rotateSwitchTokens);
@@ -415,50 +436,55 @@ const PrepareBridgePage = () => {
           }}
           isTokenListLoading={isToTokensLoading}
         />
-      </Column>
-
-      <Column height={BlockSize.Full} justifyContent={JustifyContent.center}>
-        {isLoading && !activeQuote ? (
-          <>
-            <Text textAlign={TextAlign.Center} color={TextColor.textMuted}>
-              {t('swapFetchingQuotes')}
-            </Text>
-            <MascotBackgroundAnimation height="64" width="64" />
-          </>
-        ) : null}
-      </Column>
-
-      <Column
-        gap={3}
-        className={activeQuote ? 'highlight' : ''}
-        style={{
-          paddingBottom: activeQuote?.approval ? 8 : 'revert-layer',
-          paddingTop: activeQuote?.approval ? 12 : undefined,
-        }}
-      >
-        <BridgeQuoteCard />
-        <Footer padding={0} flexDirection={FlexDirection.Column} gap={1}>
-          <BridgeCTAButton />
-          {activeQuote?.approval ? (
-            <Row justifyContent={JustifyContent.center} gap={1}>
-              <Text
-                color={TextColor.textAlternative}
-                variant={TextVariant.bodyXs}
-                textAlign={TextAlign.Center}
-              >
-                {t('willApproveAmountForBridging', [
-                  fromAmount,
-                  fromToken?.symbol,
-                ])}
+        <Column height={BlockSize.Full} justifyContent={JustifyContent.center}>
+          {isLoading && !activeQuote ? (
+            <>
+              <Text textAlign={TextAlign.Center} color={TextColor.textMuted}>
+                {t('swapFetchingQuotes')}
               </Text>
-              {fromAmount && (
-                <Tooltip title={t('grantExactAccess')}>
-                  {t('bridgeApprovalWarning', [fromAmount, fromToken?.symbol])}
-                </Tooltip>
-              )}
-            </Row>
+              <MascotBackgroundAnimation height="64" width="64" />
+            </>
           ) : null}
-        </Footer>
+        </Column>
+
+        <Row padding={6}>
+          <Column
+            gap={3}
+            className={activeQuote ? 'highlight' : ''}
+            style={{
+              paddingBottom: activeQuote?.approval ? 8 : 'revert-layer',
+              paddingTop: activeQuote?.approval ? 12 : undefined,
+              paddingInline: 16,
+            }}
+          >
+            <BridgeQuoteCard />
+            <Footer padding={0} flexDirection={FlexDirection.Column} gap={1}>
+              <BridgeCTAButton />
+              {activeQuote?.approval ? (
+                <Row justifyContent={JustifyContent.center} gap={1}>
+                  <Text
+                    color={TextColor.textAlternative}
+                    variant={TextVariant.bodyXs}
+                    textAlign={TextAlign.Center}
+                  >
+                    {t('willApproveAmountForBridging', [
+                      fromAmount,
+                      fromToken?.symbol,
+                    ])}
+                  </Text>
+                  {fromAmount && (
+                    <Tooltip title={t('grantExactAccess')}>
+                      {t('bridgeApprovalWarning', [
+                        fromAmount,
+                        fromToken?.symbol,
+                      ])}
+                    </Tooltip>
+                  )}
+                </Row>
+              ) : null}
+            </Footer>
+          </Column>
+        </Row>
       </Column>
     </Column>
   );

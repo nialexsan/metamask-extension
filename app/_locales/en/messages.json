@@ -672,9 +672,6 @@
   "autoLockTimeLimitDescription": {
     "message": "Set the idle time in minutes before MetaMask will become locked."
   },
-  "available": {
-    "message": "$1 $2 available"
-  },
   "average": {
     "message": "Average"
   },
@@ -868,7 +865,7 @@
     "message": "Bridge, don't send"
   },
   "bridgeEnterAmount": {
-    "message": "Enter amount"
+    "message": "Select amount"
   },
   "bridgeExplorerLinkViewOn": {
     "message": "View on $1"
@@ -3750,7 +3747,6 @@
   "on": {
     "message": "On"
   },
-  "onNetwork": { "message": "on $1" },
   "onboardedMetametricsAccept": {
     "message": "I agree"
   },
