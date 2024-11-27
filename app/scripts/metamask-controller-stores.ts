@@ -59,15 +59,11 @@ import type {
 } from '@metamask/notification-services-controller';
 
 import { BridgeStatusControllerState } from '../../shared/types/bridge-status';
-import { DEFAULT_AUTO_LOCK_TIME_LIMIT } from '../../shared/constants/preferences';
 
 import type { BalancesController as MultichainBalancesControllerState } from './lib/accounts/BalancesController';
 import type { NetworkOrderControllerState } from './controllers/network-order';
 import type { AccountOrderControllerState } from './controllers/account-order';
-import type {
-  Preferences,
-  PreferencesControllerState,
-} from './controllers/preferences-controller';
+import type { PreferencesControllerState } from './controllers/preferences-controller';
 import type { AppStateController } from './controllers/app-state-controller';
 import type { AlertControllerState } from './controllers/alert-controller';
 import type { OnboardingControllerState } from './controllers/onboarding';
@@ -153,64 +149,3 @@ export type MemStoreControllersComposedState = Omit<
   TxController: TransactionControllerState;
   QueuedRequestController: QueuedRequestControllerState;
 };
-
-export const initialMetamaskState: Partial<{
-  [ControllerName in keyof MemStoreControllersComposedState]: Partial<
-    MemStoreControllersComposedState[ControllerName]
-  >;
-}> = {
-  KeyringController: {
-    isUnlocked: false,
-  },
-  AccountsController: {
-    internalAccounts: { accounts: {}, selectedAccount: '' },
-  },
-  AccountTracker: {
-    currentBlockGasLimit: '',
-    currentBlockGasLimitByChainId: {},
-  },
-  AddressBookController: {
-    addressBook: {},
-  },
-  CurrencyController: {
-    currencyRates: {
-      ETH: {
-        conversionRate: null,
-        conversionDate: 0,
-        usdConversionRate: null,
-      },
-    },
-  },
-  MetaMetricsController: {
-    participateInMetaMetrics: null,
-    dataCollectionForMarketing: null,
-  },
-  NetworkController: {
-    networkConfigurationsByChainId: {},
-  },
-  OnboardingController: {
-    firstTimeFlowType: null,
-    completedOnboarding: false,
-  },
-  PreferencesController: {
-    useBlockie: false,
-    use4ByteResolution: true,
-    featureFlags: {},
-    currentLocale: '',
-    knownMethodData: {},
-    preferences: {
-      autoLockTimeLimit: DEFAULT_AUTO_LOCK_TIME_LIMIT,
-      showExtensionInFullSizeView: false,
-      showFiatInTestnets: false,
-      showTestNetworks: false,
-      smartTransactionsOptInStatus: true,
-      petnamesEnabled: true,
-      featureNotificationsEnabled: false,
-      privacyMode: false,
-      showMultiRpcModal: false,
-    } as Preferences,
-  },
-  TxController: {
-    transactions: [],
-  },
-} as const;
