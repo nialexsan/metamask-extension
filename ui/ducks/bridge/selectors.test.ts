@@ -508,6 +508,7 @@ describe('Bridge selectors', () => {
           quotesFetchStatus: 1,
           quotesRefreshCount: 5,
           quotesLastFetched: 100,
+          quotesInitialLoadTime: 11000,
           srcTokens: { '0x00': { address: '0x00', symbol: 'TEST' } },
           srcTopAssets: [{ address: '0x00', symbol: 'TEST' }],
         },
@@ -559,6 +560,7 @@ describe('Bridge selectors', () => {
         quotesLastFetchedMs: 100,
         isLoading: false,
         quotesRefreshCount: 5,
+        quotesInitialLoadTimeMs: 11000,
         isQuoteGoingToRefresh: false,
         quoteFetchError: undefined,
       });
@@ -578,6 +580,7 @@ describe('Bridge selectors', () => {
           quotes: mockErc20Erc20Quotes,
           quotesFetchStatus: 1,
           quotesRefreshCount: 2,
+          quotesInitialLoadTime: 11000,
           quotesLastFetched: 100,
           srcTokens: { '0x00': { address: '0x00', symbol: 'TEST' } },
           srcTopAssets: [{ address: '0x00', symbol: 'TEST' }],
@@ -637,6 +640,7 @@ describe('Bridge selectors', () => {
         isLoading: false,
         quotesRefreshCount: 2,
         isQuoteGoingToRefresh: true,
+        quotesInitialLoadTimeMs: 11000,
         quoteFetchError: undefined,
       });
     });
@@ -656,6 +660,7 @@ describe('Bridge selectors', () => {
           quotesFetchStatus: 1,
           quotesRefreshCount: 1,
           quotesLastFetched: 100,
+          quotesInitialLoadTime: 11000,
           srcTokens: { '0x00': { address: '0x00', symbol: 'TEST' } },
           srcTopAssets: [{ address: '0x00', symbol: 'TEST' }],
         },
@@ -712,6 +717,7 @@ describe('Bridge selectors', () => {
           ...recommendedQuoteMetadata,
         },
         quotesLastFetchedMs: 100,
+        quotesInitialLoadTimeMs: 11000,
         isLoading: false,
         quotesRefreshCount: 1,
         isQuoteGoingToRefresh: false,
@@ -733,6 +739,7 @@ describe('Bridge selectors', () => {
         quotesLastFetchedMs: undefined,
         quotesRefreshCount: undefined,
         recommendedQuote: undefined,
+        quotesInitialLoadTimeMs: undefined,
         sortedQuotes: [],
         quoteFetchError: undefined,
       });

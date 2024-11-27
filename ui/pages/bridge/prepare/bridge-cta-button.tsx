@@ -5,7 +5,6 @@ import {
   getFromAmount,
   getFromChain,
   getFromToken,
-  getToChain,
   getToToken,
   getBridgeQuotes,
   getValidationErrors,
@@ -13,6 +12,7 @@ import {
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import useSubmitBridgeTransaction from '../hooks/useSubmitBridgeTransaction';
 import useLatestBalance from '../../../hooks/bridge/useLatestBalance';
+import { useIsTxSubmittable } from '../../../hooks/bridge/useIsTxSubmittable';
 
 export const BridgeCTAButton = () => {
   const dispatch = useDispatch();
@@ -22,7 +22,6 @@ export const BridgeCTAButton = () => {
   const toToken = useSelector(getToToken);
 
   const fromChain = useSelector(getFromChain);
-  const toChain = useSelector(getToChain);
 
   const fromAmount = useSelector(getFromAmount);
 
@@ -35,14 +34,7 @@ export const BridgeCTAButton = () => {
 
   const { normalizedBalance } = useLatestBalance(fromToken, fromChain?.chainId);
 
-  const isTxSubmittable =
-    fromToken &&
-    toToken &&
-    fromChain &&
-    toChain &&
-    fromAmount &&
-    activeQuote &&
-    !isInsufficientBalance(normalizedBalance);
+  const isTxSubmittable = useIsTxSubmittable();
 
   const label = useMemo(() => {
     if (isLoading && !isTxSubmittable) {
@@ -82,7 +74,7 @@ export const BridgeCTAButton = () => {
     <Button
       data-testid="bridge-cta-button"
       onClick={() => {
-        if (isTxSubmittable) {
+        if (activeQuote && isTxSubmittable) {
           dispatch(submitBridgeTransaction(activeQuote));
         }
       }}

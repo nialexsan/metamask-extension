@@ -58,6 +58,18 @@ export const useConvertedUsdAmounts = () => {
     return {};
   }, [currency, fromChainId, fromTokenAddress]);
 
+  // If currency !== usd Fetch exchange rates for dest token
+  const usdDestExchangeRates = useMemo(async () => {
+    if (!isCurrencyUsd && toTokenAddress && activeQuote && toChainId) {
+      return await getTokenExchangeRates(
+        toChainId,
+        USD_CURRENCY_CODE,
+        toTokenAddress,
+      );
+    }
+    return {};
+  }, [currency, toTokenAddress, activeQuote]);
+
   return {
     // If a quote is passed in, derive the usd amount source from the quote
     // Otherwise use input field values
