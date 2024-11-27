@@ -850,6 +850,10 @@ export function getLedgerTransportStatus(state: AppSliceState): string | null {
   return state.appState.ledgerTransportStatus;
 }
 
+export function getIsInitialized(state: AppSliceState) {
+  return state.appState.isInitialized;
+}
+
 export function openDeleteMetaMetricsDataModal(): Action {
   return {
     type: actionConstants.DELETE_METAMETRICS_DATA_MODAL_OPEN,
