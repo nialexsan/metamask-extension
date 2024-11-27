@@ -64,11 +64,11 @@ import type { BalancesController as MultichainBalancesControllerState } from './
 import type { NetworkOrderControllerState } from './controllers/network-order';
 import type { AccountOrderControllerState } from './controllers/account-order';
 import type { PreferencesControllerState } from './controllers/preferences-controller';
-import type { AppStateController } from './controllers/app-state-controller';
+import type { AppStateControllerState } from './controllers/app-state-controller';
 import type { AlertControllerState } from './controllers/alert-controller';
 import type { OnboardingControllerState } from './controllers/onboarding';
 import type { EncryptionPublicKeyControllerState } from './controllers/encryption-public-key';
-import AppMetadataController from './controllers/app-metadata';
+import type { AppMetadataControllerState } from './controllers/app-metadata';
 import type { DecryptMessageControllerState } from './controllers/decrypt-message';
 import type { SwapsControllerState } from './controllers/swaps/swaps.types';
 import type { BridgeControllerState } from './controllers/bridge/types';
@@ -93,8 +93,8 @@ export type ResetOnRestartStoresComposedState = {
 export type StoreControllersComposedState =
   ResetOnRestartStoresComposedState & {
     AccountsController: AccountsControllerState;
-    AppStateController: AppStateController['store'];
-    AppMetadataController: AppMetadataController['store'];
+    AppStateController: AppStateControllerState;
+    AppMetadataController: AppMetadataControllerState;
     MultichainBalancesController: MultichainBalancesControllerState;
     TransactionController: TransactionControllerState;
     KeyringController: KeyringControllerState;

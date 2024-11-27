@@ -2451,8 +2451,8 @@ export default class MetamaskController extends EventEmitter {
 
     const storeControllersComposedState = {
       AccountsController: this.accountsController.state,
-      AppStateController: this.appStateController.store,
-      AppMetadataController: this.appMetadataController.store,
+      AppStateController: this.appStateController.state,
+      AppMetadataController: this.appMetadataController.state,
       MultichainBalancesController: this.multichainBalancesController.state,
       TransactionController: this.txController.state,
       KeyringController: this.keyringController.state,
@@ -2508,8 +2508,8 @@ export default class MetamaskController extends EventEmitter {
 
     const memStoreControllersComposedState = {
       AccountsController: this.accountsController.state,
-      AppStateController: this.appStateController.store,
-      AppMetadataController: this.appMetadataController.store,
+      AppStateController: this.appStateController.state,
+      AppMetadataController: this.appMetadataController.state,
       MultichainBalancesController: this.multichainBalancesController.state,
       NetworkController: this.networkController.state,
       KeyringController: this.keyringController.state,
