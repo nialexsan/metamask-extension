@@ -1,11 +1,12 @@
 import { Hex } from '@metamask/utils';
 import { BigNumber } from 'bignumber.js';
 import { getAddress } from 'ethers/lib/utils';
+import { ContractMarketData } from '@metamask/assets-controllers';
 import { decGWEIToHexWEI } from '../../../shared/modules/conversion.utils';
 import { Numeric } from '../../../shared/modules/Numeric';
 import { TxData } from '../../pages/bridge/types';
 import { getTransaction1559GasFeeEstimates } from '../../pages/swaps/swaps.util';
-import { fetchTokenExchangeRates } from '../../helpers/utils/util';
+import { fetchTokenExchangeRates as fetchTokenExchangeRatesUtil } from '../../helpers/utils/util';
 
 // We don't need to use gas multipliers here because the gasLimit from Bridge API already included it
 export const getHexMaxGasLimit = (gasLimit: number) => {
@@ -48,12 +49,12 @@ export const getTxGasEstimates = async ({
   };
 };
 
-export const getTokenExchangeRates = async (
+const fetchTokenExchangeRates = async (
   chainId: string,
   currency: string,
   ...tokenAddresses: string[]
 ) => {
-  const exchangeRates = await fetchTokenExchangeRates(
+  const exchangeRates = await fetchTokenExchangeRatesUtil(
     currency,
     tokenAddresses,
     chainId,
@@ -73,13 +74,57 @@ export const getTokenExchangeRate = async (request: {
   currency: string;
 }) => {
   const { chainId, tokenAddress, currency } = request;
-  const exchangeRates = await getTokenExchangeRates(
+  const exchangeRates = await fetchTokenExchangeRates(
     chainId,
     currency,
     tokenAddress,
   );
-  return (
+  const exchangeRate =
     exchangeRates?.[tokenAddress.toLowerCase()] ??
-    exchangeRates?.[getAddress(tokenAddress)]
-  );
+    exchangeRates?.[getAddress(tokenAddress)];
+  return exchangeRate;
+};
+
+export const exchangeRateFromMarketData = (
+  chainId: string,
+  tokenAddress: string,
+  marketData?: Record<string, ContractMarketData>,
+) =>
+  (
+    marketData?.[chainId]?.[tokenAddress.toLowerCase() as Hex] ??
+    marketData?.[chainId]?.[getAddress(tokenAddress) as Hex]
+  )?.price;
+
+export const tokenAmountToFiat = (
+  amount: string | BigNumber,
+  exchangeRate: number,
+) =>
+  new Numeric(amount, 10)
+    .applyConversionRate(new BigNumber(exchangeRate.toString(), 10))
+    .toNumber();
+
+export const tokenPriceInNativeAsset = (
+  fromTokenExchangeRate?: number | null,
+  nativeAssetToFiatRate?: number | null,
+) => {
+  return fromTokenExchangeRate && nativeAssetToFiatRate
+    ? fromTokenExchangeRate / nativeAssetToFiatRate
+    : null;
+};
+
+export const exchangeRatesFromNativeAndFiatRates = (
+  tokenToNativeAssetRate?: number,
+  nativeAssetToFiatRate?: number,
+  nativeToUsdRate?: number,
+) => {
+  return {
+    fiat:
+      tokenToNativeAssetRate && nativeAssetToFiatRate
+        ? tokenToNativeAssetRate * nativeAssetToFiatRate
+        : null,
+    usd:
+      tokenToNativeAssetRate && nativeToUsdRate
+        ? tokenToNativeAssetRate * nativeToUsdRate
+        : null,
+  };
 };

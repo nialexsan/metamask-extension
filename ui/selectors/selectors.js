@@ -1453,6 +1453,19 @@ export function getUSDConversionRate(state) {
     ?.usdConversionRate;
 }
 
+export const getUSDConversionRateByChainId = createSelector(
+  (_state, chainId) => selectNetworkConfigurationByChainId(chainId),
+  getCurrencyRates,
+  (networkConfiguration, currencyRates) => {
+    if (!networkConfiguration) {
+      return undefined;
+    }
+
+    const { nativeCurrency } = networkConfiguration;
+    return currencyRates[nativeCurrency]?.usdConversionRate;
+  },
+);
+
 export function getCurrencyRates(state) {
   return state.metamask.currencyRates;
 }
