@@ -1,6 +1,6 @@
-import { Preferences } from "../../../app/scripts/controllers/preferences-controller";
-import { MemStoreControllersComposedState } from "../../../app/scripts/metamask-controller-stores";
-import { DEFAULT_AUTO_LOCK_TIME_LIMIT } from "../../../shared/constants/preferences";
+import { Preferences } from '../../../app/scripts/controllers/preferences-controller';
+import { MemStoreControllersComposedState } from '../../../app/scripts/metamask-controller-stores';
+import { DEFAULT_AUTO_LOCK_TIME_LIMIT } from '../../../shared/constants/preferences';
 
 export const initialMetamaskState: Partial<{
   [ControllerName in keyof MemStoreControllersComposedState]: Partial<
@@ -9,6 +9,7 @@ export const initialMetamaskState: Partial<{
 }> = {
   KeyringController: {
     isUnlocked: false,
+    keyrings: [],
   },
   AccountsController: {
     internalAccounts: { accounts: {}, selectedAccount: '' },
@@ -20,6 +21,10 @@ export const initialMetamaskState: Partial<{
   AddressBookController: {
     addressBook: {},
   },
+  ApprovalController: {
+    pendingApprovals: {},
+    approvalFlows: [],
+  },
   CurrencyController: {
     currencyRates: {
       ETH: {
@@ -29,12 +34,26 @@ export const initialMetamaskState: Partial<{
       },
     },
   },
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
+  CustodyController: {
+    custodyAccountDetails: {},
+  },
+  ///: END:ONLY_INCLUDE_IF
+  DecryptMessageController: {
+    unapprovedDecryptMsgs: {},
+  },
+  GasFeeController: {
+    gasFeeEstimates: {},
+    gasEstimateType: 'none',
+  },
   MetaMetricsController: {
     participateInMetaMetrics: null,
     dataCollectionForMarketing: null,
   },
   NetworkController: {
+    selectedNetworkClientId: '',
     networkConfigurationsByChainId: {},
+    networksMetadata: {},
   },
   OnboardingController: {
     firstTimeFlowType: null,
@@ -46,6 +65,7 @@ export const initialMetamaskState: Partial<{
     featureFlags: {},
     currentLocale: '',
     knownMethodData: {},
+    ledgerTransportType: undefined,
     preferences: {
       autoLockTimeLimit: DEFAULT_AUTO_LOCK_TIME_LIMIT,
       showExtensionInFullSizeView: false,
@@ -57,6 +77,10 @@ export const initialMetamaskState: Partial<{
       privacyMode: false,
       showMultiRpcModal: false,
     } as Preferences,
+  },
+  SignatureController: {
+    unapprovedPersonalMsgs: {},
+    unapprovedTypedMessages: {},
   },
   TokensController: {
     allTokens: {},
