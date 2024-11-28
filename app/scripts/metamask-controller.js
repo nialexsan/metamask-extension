@@ -2377,7 +2377,7 @@ export default class MetamaskController extends EventEmitter {
 
         if (currUseExternalServices && !prevUseExternalServices) {
           this.remoteFeatureFlagController.enable();
-          this.getRemoteFeatureFlags();
+          this.remoteFeatureFlagController.updateRemoteFeatureFlags();
         } else if (!currUseExternalServices && prevUseExternalServices) {
           this.remoteFeatureFlagController.disable();
         }
