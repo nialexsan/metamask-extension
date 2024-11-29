@@ -1,30 +1,29 @@
 /* eslint-disable camelcase */
-import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import {
   getBridgeQuotes,
   getFromAmountInFiat,
+  getFromConversionRate,
   getQuoteRequest,
-  getToChain,
+  getToConversionRate,
 } from '../../../ducks/bridge/selectors';
-import { getCurrentCurrency } from '../../../selectors';
-import { Numeric } from '../../../../shared/modules/Numeric';
-import { decimalToHex } from '../../../../shared/modules/conversion.utils';
-import { getTokenExchangeRates } from '../../../ducks/bridge/utils';
+import { getCurrentCurrency, getUSDConversionRate } from '../../../selectors';
 import { getFromTokenInputValue } from '../../../ducks/swaps/swaps';
-import { zeroAddress } from 'ethereumjs-util';
-import { getCurrentChainId } from '../../../../shared/modules/selectors/networks';
+import { tokenAmountToFiat } from '../../../ducks/bridge/utils';
 
 const USD_CURRENCY_CODE = 'usd';
 
+// This hook is used to get the converted USD amounts for the bridge trade
+// It returns fiat values if the user's selected currency is USD
+// Otherwise, it converts the fiat values to USD using the exchange rates
+// If the amount's usd value is not available, it defaults to 0
 export const useConvertedUsdAmounts = () => {
   const { srcTokenAddress, destTokenAddress } = useSelector(getQuoteRequest);
   const { activeQuote } = useSelector(getBridgeQuotes);
-  const chainId = useSelector(getCurrentChainId);
-  const fromAmountInFiat_ = useSelector(getFromAmountInFiat);
+  const fromAmountInputValueInFiat = useSelector(getFromAmountInFiat);
   const srcTokenAmount = useSelector(getFromTokenInputValue);
-  const toChain = useSelector(getToChain);
-
+  const fromTokenConversionRate = useSelector(getFromConversionRate);
+  const toTokenConversionRate = useSelector(getToConversionRate);
   const currency = useSelector(getCurrentCurrency);
 
   // Use values from activeQuote if available, otherwise use validated input field values
@@ -34,72 +33,40 @@ export const useConvertedUsdAmounts = () => {
   const toTokenAddress = (
     activeQuote ? activeQuote.quote.destAsset.address : destTokenAddress
   )?.toLowerCase();
-  const fromChainId = activeQuote
-    ? decimalToHex(activeQuote.quote.srcChainId)
-    : chainId;
-  const toChainId = activeQuote
-    ? decimalToHex(activeQuote.quote.destChainId)
-    : toChain?.chainId;
 
-  const fromAmountInFiat = activeQuote?.sentAmount?.fiat ?? fromAmountInFiat_;
+  const fromAmountInFiat =
+    activeQuote?.sentAmount?.fiat ?? fromAmountInputValueInFiat;
   const fromAmount = activeQuote?.sentAmount.amount ?? srcTokenAmount;
 
   const isCurrencyUsd = currency.toLowerCase() === USD_CURRENCY_CODE;
 
-  // If currency !== usd Fetch exchange rates for src native and selected token
-  const usdSrcExchangeRates = useMemo(async () => {
-    if (!isCurrencyUsd && fromTokenAddress) {
-      return await getTokenExchangeRates(
-        fromChainId,
-        USD_CURRENCY_CODE,
-        fromTokenAddress,
-      );
-    }
-    return {};
-  }, [currency, fromChainId, fromTokenAddress]);
-
-  // If currency !== usd Fetch exchange rates for dest token
-  const usdDestExchangeRates = useMemo(async () => {
-    if (!isCurrencyUsd && toTokenAddress && activeQuote && toChainId) {
-      return await getTokenExchangeRates(
-        toChainId,
-        USD_CURRENCY_CODE,
-        toTokenAddress,
-      );
-    }
-    return {};
-  }, [currency, toTokenAddress, activeQuote]);
+  const nativeToUsdRate = useSelector(getUSDConversionRate);
 
   return {
     // If a quote is passed in, derive the usd amount source from the quote
-    // Otherwise use input field values
-    srcUsdAmounts: async () => ({
-      usd_amount_source:
-        fromAmount && fromTokenAddress && !isCurrencyUsd
-          ? new Numeric(fromAmount, 10)
-              .applyConversionRate(
-                (await usdSrcExchangeRates)[fromTokenAddress],
-              )
-              .toNumber()
-          : fromAmountInFiat.toNumber(),
-      // If user's selected currency is not usd, fetch usd exchange rates for
-      // the gas token and convert the quoted gas amount to usd
-      usd_quoted_gas:
-        activeQuote?.gasFee.amount && !isCurrencyUsd
-          ? new Numeric(activeQuote.gasFee.amount, 10)
-              .applyConversionRate((await usdSrcExchangeRates)[zeroAddress()])
-              .toNumber()
-          : activeQuote?.gasFee.fiat?.toNumber() ?? 0,
-    }),
-    destUsdAmounts: async () => ({
-      // If user's selected currency is not usd, fetch usd exchange rates for
-      // the dest asset and convert the dest amount to usd
-      usd_quoted_return:
-        activeQuote?.toTokenAmount?.amount && toTokenAddress && !isCurrencyUsd
-          ? new Numeric(activeQuote?.toTokenAmount?.amount, 10)
-              .applyConversionRate((await usdDestExchangeRates)[toTokenAddress])
-              .toNumber()
-          : activeQuote?.toTokenAmount?.fiat?.toNumber() ?? 0,
-    }),
+    // otherwise use input field values
+    usd_amount_source:
+      fromAmount && fromTokenAddress && !isCurrencyUsd
+        ? (fromTokenConversionRate?.usd &&
+            tokenAmountToFiat(fromAmount, fromTokenConversionRate.usd)) ??
+          0
+        : fromAmountInFiat.toNumber(),
+    // If user's selected currency is not usd, use usd exchange rates for
+    // the gas token and convert the quoted gas amount to usd
+    usd_quoted_gas:
+      activeQuote?.gasFee.amount && !isCurrencyUsd
+        ? tokenAmountToFiat(activeQuote.gasFee.amount, nativeToUsdRate) ?? 0
+        : activeQuote?.gasFee.fiat?.toNumber() ?? 0,
+    // If user's selected currency is not usd, use usd exchange rates for
+    // the dest asset and convert the dest amount to usd
+    usd_quoted_return:
+      activeQuote?.toTokenAmount?.amount && toTokenAddress && !isCurrencyUsd
+        ? (toTokenConversionRate.usd &&
+            tokenAmountToFiat(
+              activeQuote?.toTokenAmount?.amount,
+              toTokenConversionRate.usd,
+            )) ??
+          0
+        : activeQuote?.toTokenAmount?.fiat?.toNumber() ?? 0,
   };
 };
